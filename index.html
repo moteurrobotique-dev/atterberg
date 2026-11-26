@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Limites d'Atterberg — NF P94-051</title>
+<meta name="description" content="Calcul des limites d'Atterberg selon la norme NF P94-051 : limite de liquidité, limite de plasticité, indice de plasticité et classification de Casagrande." />
+<meta name="theme-color" content="#1A3A5C" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Atterberg" />
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; background:#f1f5f9; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding:12px; color:#0f172a; }
+  .app { max-width:1120px; margin:0 auto; display:flex; flex-direction:column; gap:16px; }
+  .card { background:#fff; border:1px solid #e2e8f0; border-radius:16px; box-shadow:0 1px 3px rgba(0,0,0,.08); overflow:hidden; }
+  .hdr { background:#1A3A5C; padding:14px 20px; border-radius:16px; display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .hdr h1 { color:#fff; font-size:22px; margin:0; }
+  .hdr p, .std { color:#94a3b8; font-size:12px; margin:0; }
+  .brand { display:flex; align-items:center; gap:12px; }
+  .brand-byline { margin-top:3px !important; }
+  .logo { width:48px; height:48px; border-radius:12px; object-fit:cover; flex-shrink:0; }
+  .meta { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; padding:14px 16px; background:#fff; }
+  .meta label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#64748b; margin-bottom:5px; font-weight:600; }
+  .tbar { background:#1A3A5C; padding:8px 16px; display:flex; gap:8px; align-items:center; color:#fff; font-size:13px; font-weight:600; }
+  .tbar.orange { background:#E85D26; }
+  .tbar.gray { background:#475569; }
+  .badge { background:#E85D26; color:#fff; font-size:11px; font-weight:700; border-radius:999px; padding:2px 10px; }
+  .tbar.orange .badge { background:#fff; color:#E85D26; }
+  .tbl { width:100%; border-collapse:collapse; font-size:14px; }
+  .tbl th, .tbl td { padding:7px 6px; border-bottom:1px solid #f1f5f9; }
+  .tbl thead th { background:#f8fafc; text-align:center; color:#64748b; font-weight:500; font-size:11px; line-height:1.4; white-space:nowrap; }
+  .tbl thead th:first-child { text-align:left; }
+  .lbl { color:#475569; text-align:left; padding-left:14px; white-space:nowrap; font-weight:500; }
+  .sym { color:#64748b; font-family:monospace; font-size:12px; text-align:center; }
+  .ess { font-size:10px; font-weight:700; letter-spacing:.05em; color:#94a3b8; }
+  .nlbl { font-size:11px; color:#94a3b8; margin:2px 0; }
+  .col-name { font-size:13px !important; color:#1A3A5C !important; font-weight:700 !important; }
+  .wp-col { color:#1d4ed8 !important; font-size:11px; }
+  .wp-row td { background:#eff6ff; border-top:2px solid #bfdbfe; }
+  .wp-lbl { color:#1d4ed8; font-weight:700; }
+  .wp-val { text-align:center; font-family:monospace; font-weight:700; font-size:22px; color:#1d4ed8; }
+  input { border:1px solid #cbd5e1; border-radius:8px; padding:6px; text-align:center; font-family:inherit; font-size:14px; width:80px; background:#fff; color:#0f172a; min-width:0; }
+  input:focus { outline:none; border-color:#E85D26; box-shadow:0 0 0 2px rgba(232,93,38,.25); }
+  input.n { width:56px; font-weight:700; color:#1A3A5C; }
+  .calc { text-align:center; font-family:monospace; font-weight:600; font-size:14px; padding:8px; }
+  .calc.ok { background:#ecfdf5; color:#047857; }
+  .calc.warn { background:#fef2f2; color:#b91c1c; }
+  .calc.na { color:#e2e8f0; }
+  .banner { margin:8px 16px 14px; background:#fefce8; border:1px solid #fde68a; color:#92400e; border-radius:12px; padding:10px 12px; font-size:12px; }
+  .wrap { overflow-x:auto; }
+  .results { display:grid; grid-template-columns:1fr 1fr 1fr; }
+  .res { padding:22px; text-align:center; border-bottom:1px solid #f1f5f9; }
+  .res.dark { background:#1A3A5C; border-bottom:none; }
+  .res .t { font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:#94a3b8; }
+  .res.dark .t { color:#cbd5e1; }
+  .res .pct { font-size:12px; color:#94a3b8; }
+  .res.dark .pct { color:#cbd5e1; }
+  .res .v { font-size:44px; font-weight:700; font-family:Georgia, "Times New Roman", serif; color:#1A3A5C; margin-top:4px; }
+  .res.dark .v { color:#E85D26; font-size:26px; font-family:inherit; }
+  .res .note { font-size:11px; color:#94a3b8; margin-top:6px; }
+  .res.dark .note { color:#94a3b8; }
+  .legend { display:flex; gap:16px; justify-content:center; color:#94a3b8; font-size:12px; }
+  .sw { display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:5px; vertical-align:-2px; }
+  .sw.ok { background:#d1fae5; border:1px solid #6ee7b7; }
+  .sw.warn { background:#fee2e2; border:1px solid #fca5a5; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .btn { background:#1A3A5C; color:#fff; border:none; border-radius:10px; padding:10px 16px; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .btn:hover { background:#24486f; }
+  .btn.danger { background:#dc2626; }
+  .btn.danger:hover { background:#b91c1c; }
+  .muted { color:#94a3b8; font-size:12px; }
+  .note { font-size:11px; color:#94a3b8; padding:10px 16px 12px; }
+  /* ── Micro intégré aux cases ── */
+  .mic { display:flex; align-items:center; justify-content:center; border:none; background:transparent; color:#E85D26; cursor:pointer; font-size:12px; line-height:1; padding:0; border-radius:6px; }
+  .vwrap { position:relative; display:inline-block; vertical-align:middle; }
+  .vwrap input { padding-right:26px; }
+  .vwrap input.n { padding-right:22px; }
+  .vwrap .mic { position:absolute; right:3px; top:50%; transform:translateY(-50%); width:20px; height:20px; font-size:11px; }
+  .vwrap .mic:hover { background:#fde8dd; color:#c94d1c; }
+  .mic-sm { width:30px; height:30px; font-size:13px; background:#E85D26; color:#fff; border-radius:9px; flex-shrink:0; }
+  .mic-sm:hover { background:#c94d1c; }
+  .mic.on { background:#E85D26 !important; color:#fff !important; animation:pulse 1s infinite; }
+  .mic-sm.on { background:#1A3A5C !important; }
+  input.listening { border-color:#E85D26; box-shadow:0 0 0 2px rgba(232,93,38,.25); }
+  input.bad-voice { background:#fef2f2; border-color:#fca5a5; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+  @media (max-width:760px) {
+    .results { grid-template-columns:1fr; }
+    .meta { grid-template-columns:1fr; }
+    .hdr { flex-direction:column; align-items:flex-start; text-align:left; }
+    .hdr h1 { font-size:18px; }
+    .hdr .std { padding-left:60px; }
+    .res .v { font-size:34px; }
+  }
+  @media print {
+    .mic, .btn, .banner, .note, .legend { display:none !important; }
+    body { background:#fff; padding:0; }
+    .card { box-shadow:none; border:1px solid #ddd; break-inside:avoid; }
+    input { border:none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="hdr">
+    <div class="brand">
+      <img class="logo" src="icon-192.png" alt="Atterberg" />
+      <div>
+        <h1>Limites d'Atterberg</h1>
+        <p class="brand-byline">Créée par NEY</p>
+      </div>
+    </div>
+    <p class="std">NF P94-051 · FIP 011<br/>Essai à la coupelle de Casagrande</p>
+  </header>
+
+  <!-- Fiche échantillon -->
+  <div class="card">
+    <div class="tbar"><span class="badge">✎</span> FICHE ÉCHANTILLON</div>
+    <div class="meta">
+      <div>
+        <label>N° Échantillon</label>
+        <span class="vwrap" style="display:flex;width:100%">
+          <input id="m-ech" style="flex:1" placeholder="Ex. : E-0421" autocomplete="off" />
+          <button type="button" class="mic" data-field="m-ech" data-kind="text" title="Dicter le nom">🎙</button>
+        </span>
+      </div>
+      <div>
+        <label>Opérateur</label>
+        <span class="vwrap" style="display:flex;width:100%">
+          <input id="m-op" style="flex:1" placeholder="Votre nom" autocomplete="off" />
+          <button type="button" class="mic" data-field="m-op" data-kind="text" title="Dicter le nom">🎙</button>
+        </span>
+      </div>
+      <div>
+        <label>Date d'essai</label>
+        <span style="display:flex;width:100%;gap:6px;align-items:center">
+          <input id="m-date" type="date" style="flex:1" />
+          <button type="button" class="mic mic-sm" data-field="m-date" data-kind="date" title="Dicter (ex. : neuf août deux mille vingt-six)">🎙</button>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barre d'actions -->
+  <div class="actions">
+    <span id="save-msg" class="muted">Cliquez sur Sauvegarder pour conserver vos données (mémorisées dans ce navigateur)</span>
+    <button id="btn-save" class="btn">💾 Sauvegarder</button>
+    <button id="btn-print" class="btn">🖨 Imprimer / PDF</button>
+    <button id="btn-clear" class="btn danger">🗑 Effacer</button>
+  </div>
+
+  <!-- 1 · Limite de liquidité -->
+  <div class="card">
+    <div class="tbar orange"><span class="badge">1</span> LIMITE DE LIQUIDITÉ — coupelle de Casagrande</div>
+    <div class="wrap">
+      <div id="liq-table"></div>
+    </div>
+    <div id="anom-banner" class="banner" style="display:none">⚠ Teneurs en eau trop dispersées : écart supérieur à 15 % entre le minimum et le maximum. Vérifiez les saisies ou recommencez les essais (NF P94-051, § 5.4.2).</div>
+  </div>
+
+  <!-- Graphique Casagrande -->
+  <div class="card">
+    <div class="tbar gray">GRAPHIQUE CASAGRANDE <span style="font-weight:400;color:#cbd5e1;margin-left:6px">w = f(log N)</span></div>
+    <div id="chart" style="padding:12px"></div>
+  </div>
+
+  <!-- 2 · Limite de plasticité -->
+  <div class="card">
+    <div class="tbar"><span class="badge">2</span> LIMITE DE PLASTICITÉ — roulage de fils</div>
+    <div class="wrap">
+      <div id="plas-table"></div>
+    </div>
+  </div>
+
+  <!-- 3 · Résultats -->
+  <div class="card">
+    <div class="tbar orange"><span class="badge">3</span> RÉSULTATS D'ESSAI</div>
+    <div class="results">
+      <div class="res">
+        <div class="t">Limite de Liquidité</div>
+        <div class="pct">W<sub>L</sub>(25)</div>
+        <div class="v" id="r-wl">—</div>
+        <div class="pct">%</div>
+        <div class="note">Interpolé à N = 25 coups</div>
+      </div>
+      <div class="res">
+        <div class="t">Limite de Plasticité</div>
+        <div class="pct">W<sub>P</sub></div>
+        <div class="v" id="r-wp">—</div>
+        <div class="pct">%</div>
+        <div class="note">Moyenne des deux essais</div>
+      </div>
+      <div class="res dark">
+        <div class="t">Indice de Plasticité</div>
+        <div class="pct">I<sub>P</sub> = W<sub>L</sub> − W<sub>P</sub></div>
+        <div class="v" id="r-ip">—</div>
+        <div class="pct">%</div>
+        <div class="note" id="r-classif"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span><span class="sw ok"></span>Valeur calculée automatiquement</span>
+    <span><span class="sw warn"></span>Valeur anormale à vérifier</span>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var STORAGE_KEY = "atterberg-state-v1";
+
+  function el(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+  function toNum(v) {
+    if (v === null || v === undefined) return NaN;
+    return parseFloat(String(v).replace(/\s/g, "").replace(",", "."));
+  }
+
+  function defaultState() {
+    var liq = [], plas = [], i;
+    for (i = 0; i < 5; i++) liq.push({ N: 0, tare: "", a: "", b: "", c: "" });
+    plas.push({ tare: "PB", a: "", b: "", c: "" });
+    plas.push({ tare: "LA", a: "", b: "", c: "" });
+    return { meta: { echantillon: "", operateur: "", date: "" }, liq: liq, plas: plas };
+  }
+
+  var state = defaultState();
+  try {
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      if (parsed && parsed.liq && parsed.plas && parsed.meta) state = parsed;
+    }
+  } catch (e) { /* stockage indisponible : on continue */ }
+
+  function computeRow(a, b, c) {
+    var A = toNum(a), B = toNum(b), C = toNum(c);
+    if (isNaN(A) || isNaN(B) || isNaN(C)) return { d: null, e: null, f: null };
+    var d = A - B;
+    var e = B - C;
+    var f = (d >= 0 && e > 0) ? (d / e) * 100 : null;
+    return { d: d, e: e, f: f };
+  }
+
+  function setCalc(id, val, isPct, warn) {
+    var cell = el(id);
+    if (!cell) return;
+    cell.className = "calc";
+    if (val === null || isNaN(val)) { cell.textContent = ""; cell.classList.add("na"); return; }
+    cell.textContent = isPct ? val.toFixed(2) + " %" : val.toFixed(4);
+    cell.classList.add(warn ? "warn" : "ok");
+  }
+
+  /* ── Cellule avec micro intégré ── */
+  function cell(id, o) {
+    o = o || {};
+    var kind = o.kind || "num";
+    var w = o.w || (kind === "text" ? "64px" : "80px");
+    var cls = o.cls || "";
+    var ph = o.ph || "";
+    var val = o.val != null ? esc(o.val) : "";
+    var im = o.im || (kind === "text" ? "text" : "decimal");
+    return '<span class="vwrap">' +
+      '<input id="' + id + '" type="text" inputmode="' + im + '" class="' + cls + '" style="width:' + w + '" value="' + val + '" placeholder="' + ph + '" autocomplete="off" spellcheck="false" />' +
+      '<button type="button" class="mic" data-field="' + id + '" data-kind="' + kind + '" title="Dicter cette case">🎙</button>' +
+      '</span>';
+  }
+
+  /* ── Construction des fiches (essais en colonnes) ── */
+  function buildTables() {
+    var h, i, j;
+
+    /* 1 · Limite de liquidité : 5 colonnes d'essais */
+    h = '<table class="tbl" style="min-width:980px">';
+    h += '<thead><tr>';
+    h += '<th>Grandeur</th><th class="sym">Symbole</th><th class="sym">U.</th>';
+    for (i = 0; i < 5; i++) {
+      h += '<th><div class="ess">ESSAI ' + (i + 1) + '</div>' +
+           '<div class="nlbl">N =</div>' +
+           cell("l-N-" + i, { kind: "num", cls: "n", w: "56px", im: "numeric", ph: "cps", val: state.liq[i].N || "" }) +
+           '</th>';
+    }
+    h += '</tr></thead><tbody>';
+    h += '<tr><td class="lbl">N° de la tare</td><td class="sym">#</td><td class="sym">—</td>';
+    for (i = 0; i < 5; i++) h += '<td>' + cell("l-tare-" + i, { kind: "text", w: "64px", ph: "n°", val: state.liq[i].tare }) + '</td>';
+    h += '</tr>';
+    h += '<tr><td class="lbl">Poids total humide</td><td class="sym">a</td><td class="sym">g</td>';
+    for (i = 0; i < 5; i++) h += '<td>' + cell("l-a-" + i, { kind: "num", ph: "g", val: state.liq[i].a }) + '</td>';
+    h += '</tr>';
+    h += '<tr><td class="lbl">Poids total sec</td><td class="sym">b</td><td class="sym">g</td>';
+    for (i = 0; i < 5; i++) h += '<td>' + cell("l-b-" + i, { kind: "num", ph: "g", val: state.liq[i].b }) + '</td>';
+    h += '</tr>';
+    h += '<tr><td class="lbl">Poids de la tare</td><td class="sym">c</td><td class="sym">g</td>';
+    for (i = 0; i < 5; i++) h += '<td>' + cell("l-c-" + i, { kind: "num", ph: "g", val: state.liq[i].c }) + '</td>';
+    h += '</tr>';
+    h += '<tr style="border-top:2px solid #cbd5e1"><td class="lbl">Poids de l\'eau</td><td class="sym">d = a−b</td><td class="sym">g</td>';
+    for (i = 0; i < 5; i++) h += '<td id="l-d-' + i + '" class="calc na"></td>';
+    h += '</tr>';
+    h += '<tr><td class="lbl">Poids mat. sec</td><td class="sym">e = b−c</td><td class="sym">g</td>';
+    for (i = 0; i < 5; i++) h += '<td id="l-e-' + i + '" class="calc na"></td>';
+    h += '</tr>';
+    h += '<tr><td class="lbl" style="font-weight:600">Teneur en eau</td><td class="sym">f = d/e</td><td class="sym">%</td>';
+    for (i = 0; i < 5; i++) h += '<td id="l-f-' + i + '" class="calc na"></td>';
+    h += '</tr>';
+    h += '</tbody></table>';
+    el("liq-table").innerHTML = h;
+
+    /* 2 · Limite de plasticité : colonnes PB / LA + moyenne */
+    h = '<table class="tbl" style="min-width:700px">';
+    h += '<thead><tr>';
+    h += '<th>Grandeur</th><th class="sym">Symbole</th><th class="sym">U.</th>';
+    for (j = 0; j < 2; j++) h += '<th id="p-h-' + j + '" class="col-name">' + esc(state.plas[j].tare) + '</th>';
+    h += '<th class="wp-col">Moy. W<sub>P</sub></th>';
+    h += '</tr></thead><tbody>';
+    h += '<tr><td class="lbl">N° de la tare</td><td class="sym">#</td><td class="sym">—</td>';
+    for (j = 0; j < 2; j++) h += '<td>' + cell("p-tare-" + j, { kind: "text", w: "64px", ph: "n°", val: state.plas[j].tare }) + '</td>';
+    h += '<td></td></tr>';
+    h += '<tr><td class="lbl">Poids total humide</td><td class="sym">a</td><td class="sym">g</td>';
+    for (j = 0; j < 2; j++) h += '<td>' + cell("p-a-" + j, { kind: "num", ph: "g", val: state.plas[j].a }) + '</td>';
+    h += '<td></td></tr>';
+    h += '<tr><td class="lbl">Poids total sec</td><td class="sym">b</td><td class="sym">g</td>';
+    for (j = 0; j < 2; j++) h += '<td>' + cell("p-b-" + j, { kind: "num", ph: "g", val: state.plas[j].b }) + '</td>';
+    h += '<td></td></tr>';
+    h += '<tr><td class="lbl">Poids de la tare</td><td class="sym">c</td><td class="sym">g</td>';
+    for (j = 0; j < 2; j++) h += '<td>' + cell("p-c-" + j, { kind: "num", ph: "g", val: state.plas[j].c }) + '</td>';
+    h += '<td></td></tr>';
+    h += '<tr style="border-top:2px solid #cbd5e1"><td class="lbl">Poids de l\'eau</td><td class="sym">d = a−b</td><td class="sym">g</td>';
+    for (j = 0; j < 2; j++) h += '<td id="p-d-' + j + '" class="calc na"></td>';
+    h += '<td></td></tr>';
+    h += '<tr><td class="lbl">Poids mat. sec</td><td class="sym">e = b−c</td><td class="sym">g</td>';
+    for (j = 0; j < 2; j++) h += '<td id="p-e-' + j + '" class="calc na"></td>';
+    h += '<td></td></tr>';
+    h += '<tr><td class="lbl" style="font-weight:600">Teneur en eau</td><td class="sym">f = d/e</td><td class="sym">%</td>';
+    for (j = 0; j < 2; j++) h += '<td id="p-f-' + j + '" class="calc na"></td>';
+    h += '<td></td></tr>';
+    h += '<tr class="wp-row"><td class="lbl wp-lbl" colspan="3">W<sub>P</sub> moyen</td><td></td><td></td><td class="wp-val" id="wp-mean">—</td></tr>';
+    h += '</tbody></table>';
+    el("plas-table").innerHTML = h;
+  }
+
+  function syncFromState() {
+    el("m-ech").value = state.meta.echantillon || "";
+    el("m-op").value = state.meta.operateur || "";
+    el("m-date").value = state.meta.date || "";
+    var i, j;
+    for (i = 0; i < 5; i++) {
+      el("l-N-" + i).value = state.liq[i].N || "";
+      el("l-tare-" + i).value = state.liq[i].tare;
+      el("l-a-" + i).value = state.liq[i].a;
+      el("l-b-" + i).value = state.liq[i].b;
+      el("l-c-" + i).value = state.liq[i].c;
+    }
+    for (j = 0; j < 2; j++) {
+      el("p-tare-" + j).value = state.plas[j].tare;
+      el("p-a-" + j).value = state.plas[j].a;
+      el("p-b-" + j).value = state.plas[j].b;
+      el("p-c-" + j).value = state.plas[j].c;
+    }
+  }
+
+  /* ── Graphique Casagrande en SVG natif ── */
+  function renderChart(pts, WL) {
+    var wrap = el("chart");
+    if (!pts.length) {
+      wrap.innerHTML = '<p style="color:#94a3b8;font-size:13px;padding:24px;text-align:center">Saisissez au moins 2 essais complets (N et masses a, b, c) pour tracer la droite de Casagrande.</p>';
+      return;
+    }
+    var W = 720, H = 440, mL = 56, mT = 24, mR = 64, mB = 44;
+    var pw = W - mL - mR, ph = H - mT - mB;
+    var ws = pts.map(function (p) { return p.w; });
+    var ymin = Math.max(0, Math.floor((Math.min.apply(null, ws) - 10) / 10) * 10);
+    var ymax = Math.ceil((Math.max.apply(null, ws) + 10) / 10) * 10;
+    if (ymax - ymin < 20) ymax = ymin + 20;
+    var lmin = Math.log10(1), lmax = Math.log10(100);
+    function X(lx) { return mL + ((lx - lmin) / (lmax - lmin)) * pw; }
+    function Y(w) { return mT + ((ymax - w) / (ymax - ymin)) * ph; }
+
+    var h = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" style="max-width:720px;display:block;margin:0 auto;font-family:system-ui,sans-serif" role="img" aria-label="Droite de Casagrande : teneur en eau en fonction du nombre de coups (échelle logarithmique)">';
+
+    for (var w = ymin; w <= ymax; w += 10) {
+      var yy = Y(w);
+      h += '<line x1="' + mL + '" y1="' + yy.toFixed(1) + '" x2="' + (W - mR) + '" y2="' + yy.toFixed(1) + '" stroke="#f1f5f9"/>';
+      h += '<text x="' + (mL - 8) + '" y="' + (yy + 4).toFixed(1) + '" text-anchor="end" font-size="11" fill="#64748b">' + w + '</text>';
+    }
+    var ticks = [10, 15, 20, 25, 30, 40, 50];
+    ticks.forEach(function (N) {
+      var xx = X(Math.log10(N));
+      h += '<line x1="' + xx.toFixed(1) + '" y1="' + mT + '" x2="' + xx.toFixed(1) + '" y2="' + (H - mB) + '" stroke="#e2e8f0" stroke-dasharray="3 3"/>';
+      h += '<text x="' + xx.toFixed(1) + '" y="' + (H - mB + 16) + '" text-anchor="middle" font-size="11" fill="#64748b">' + N + '</text>';
+    });
+    h += '<line x1="' + mL + '" y1="' + mT + '" x2="' + mL + '" y2="' + (H - mB) + '" stroke="#94a3b8"/>';
+    h += '<line x1="' + mL + '" y1="' + (H - mB) + '" x2="' + (W - mR) + '" y2="' + (H - mB) + '" stroke="#94a3b8"/>';
+    h += '<text x="' + (mL + pw / 2) + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="#94a3b8">Nombre de coups N (échelle logarithmique)</text>';
+    var midY = mT + ph / 2;
+    h += '<text x="14" y="' + midY + '" text-anchor="middle" font-size="11" fill="#94a3b8" transform="rotate(-90 14 ' + midY + ')">Teneur en eau w (%)</text>';
+    var x25 = X(Math.log10(25));
+    h += '<line x1="' + x25.toFixed(1) + '" y1="' + mT + '" x2="' + x25.toFixed(1) + '" y2="' + (H - mB) + '" stroke="#E85D26" stroke-dasharray="5 4" stroke-width="1.5"/>';
+    h += '<text x="' + (x25 + 4).toFixed(1) + '" y="' + (mT + 10) + '" font-size="10" fill="#E85D26">N = 25</text>';
+    var poly = pts.map(function (p) { return X(Math.log10(p.N)).toFixed(1) + "," + Y(p.w).toFixed(1); }).join(" ");
+    h += '<polyline points="' + poly + '" fill="none" stroke="#E85D26" stroke-width="2.5" stroke-linejoin="round"/>';
+    pts.forEach(function (p) {
+      var cx = X(Math.log10(p.N)).toFixed(1), cy = Y(p.w).toFixed(1);
+      h += '<circle cx="' + cx + '" cy="' + cy + '" r="5" fill="#E85D26" stroke="#fff" stroke-width="2"><title>N = ' + p.N + ' coups · w = ' + p.w.toFixed(2) + ' %</title></circle>';
+    });
+    if (WL !== null) {
+      var yw = Y(WL);
+      h += '<line x1="' + mL + '" y1="' + yw.toFixed(1) + '" x2="' + (W - mR) + '" y2="' + yw.toFixed(1) + '" stroke="#1A3A5C" stroke-dasharray="5 4" stroke-width="1.5"/>';
+      h += '<text x="' + (W - mR - 6) + '" y="' + (yw - 5).toFixed(1) + '" text-anchor="end" font-size="10" fill="#1A3A5C">WL = ' + WL.toFixed(1) + ' %</text>';
+    }
+    h += '</svg>';
+    wrap.innerHTML = h;
+  }
+
+  /* ── Recalcul global ── */
+  function recalc() {
+    var liqR = [], i, j, k;
+    for (i = 0; i < 5; i++) liqR.push(computeRow(state.liq[i].a, state.liq[i].b, state.liq[i].c));
+    var fVals = [];
+    for (k = 0; k < 5; k++) if (liqR[k].f !== null) fVals.push(liqR[k].f);
+    var fMean = fVals.length ? fVals.reduce(function (a, b) { return a + b; }, 0) / fVals.length : null;
+    var hasAnom = fVals.length > 0 && fMean !== null && (Math.max.apply(null, fVals) - Math.min.apply(null, fVals) > 15);
+
+    for (i = 0; i < 5; i++) {
+      var c = liqR[i];
+      setCalc("l-d-" + i, c.d, false, false);
+      setCalc("l-e-" + i, c.e, false, false);
+      var warn = c.f !== null && fMean !== null && Math.abs(c.f - fMean) > 15;
+      setCalc("l-f-" + i, c.f, true, warn);
+    }
+    el("anom-banner").style.display = hasAnom ? "block" : "none";
+
+    var plasR = [computeRow(state.plas[0].a, state.plas[0].b, state.plas[0].c),
+                 computeRow(state.plas[1].a, state.plas[1].b, state.plas[1].c)];
+    var fs = [];
+    for (j = 0; j < 2; j++) if (plasR[j].f !== null) fs.push(plasR[j].f);
+    var WP = fs.length ? fs.reduce(function (a, b) { return a + b; }, 0) / fs.length : null;
+    for (j = 0; j < 2; j++) {
+      setCalc("p-d-" + j, plasR[j].d, false, false);
+      setCalc("p-e-" + j, plasR[j].e, false, false);
+      setCalc("p-f-" + j, plasR[j].f, true, false);
+      el("p-h-" + j).textContent = state.plas[j].tare || ("Col. " + (j + 1));
+    }
+    el("wp-mean").textContent = WP === null ? "—" : WP.toFixed(2) + " %";
+
+    var pts = [];
+    for (var m = 0; m < 5; m++) {
+      if (liqR[m].f !== null && state.liq[m].N > 0) pts.push({ N: state.liq[m].N, w: liqR[m].f });
+    }
+    pts.sort(function (a, b) { return a.N - b.N; });
+    var WL = null;
+    if (pts.length >= 2) {
+      var p1 = null, p2 = null;
+      for (var q = 0; q < pts.length - 1; q++) {
+        if (pts[q].N <= 25 && pts[q + 1].N >= 25) { p1 = pts[q]; p2 = pts[q + 1]; break; }
+      }
+      if (!p1) { p1 = pts[pts.length - 2]; p2 = pts[pts.length - 1]; }
+      var l1 = Math.log10(p1.N), l2 = Math.log10(p2.N), l25 = Math.log10(25);
+      WL = l1 === l2 ? (p1.w + p2.w) / 2 : p1.w + (p2.w - p1.w) * (l25 - l1) / (l2 - l1);
+    }
+
+    var IP = (WL !== null && WP !== null) ? WL - WP : null;
+    var classif = null;
+    if (WL !== null && IP !== null) {
+      classif = IP > 0.73 * (WL - 20)
+        ? (WL < 50 ? "CL — Argile faible plasticité" : "CH — Argile haute plasticité")
+        : (WL < 50 ? "ML — Limon faible plasticité" : "MH — Limon haute plasticité");
+    }
+    el("r-wl").textContent = WL === null ? "—" : WL.toFixed(1);
+    el("r-wp").textContent = WP === null ? "—" : WP.toFixed(1);
+    el("r-ip").textContent = IP === null ? "—" : IP.toFixed(1);
+    el("r-classif").textContent = classif || "";
+    renderChart(pts, WL);
+  }
+
+  /* ── Liaison des événements ── */
+  function bind() {
+    el("m-ech").addEventListener("input", function () { state.meta.echantillon = this.value; });
+    el("m-op").addEventListener("input", function () { state.meta.operateur = this.value; });
+    el("m-date").addEventListener("input", function () { state.meta.date = this.value; });
+
+    for (var i = 0; i < 5; i++) {
+      (function (i) {
+        var row = state.liq[i];
+        el("l-N-" + i).addEventListener("input", function () { row.N = parseInt(this.value, 10) || 0; recalc(); });
+        el("l-tare-" + i).addEventListener("input", function () { row.tare = this.value; recalc(); });
+        ["a", "b", "c"].forEach(function (k) {
+          el("l-" + k + "-" + i).addEventListener("input", function () { row[k] = this.value; recalc(); });
+        });
+      })(i);
+    }
+    for (var j = 0; j < 2; j++) {
+      (function (j) {
+        var row = state.plas[j];
+        el("p-tare-" + j).addEventListener("input", function () { row.tare = this.value; recalc(); });
+        ["a", "b", "c"].forEach(function (k) {
+          el("p-" + k + "-" + j).addEventListener("input", function () { row[k] = this.value; recalc(); });
+        });
+      })(j);
+    }
+
+    el("btn-save").addEventListener("click", function () {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { }
+      var m = el("save-msg");
+      m.textContent = "💾 Sauvegardé à " + new Date().toLocaleTimeString();
+      m.classList.remove("muted");
+      setTimeout(function () {
+        m.textContent = "Cliquez sur Sauvegarder pour conserver vos données (mémorisées dans ce navigateur)";
+        m.classList.add("muted");
+      }, 4000);
+    });
+    el("btn-print").addEventListener("click", function () { window.print(); });
+    el("btn-clear").addEventListener("click", function () {
+      if (!confirm("Effacer toutes les valeurs saisies ?")) return;
+      state = defaultState();
+      syncFromState();
+      recalc();
+    });
+  }
+
+  /* ════════════════════════════════════════════════════════
+     SAISIE VOCALE — micro dans chaque case, dictée enchaînée
+     ════════════════════════════════════════════════════════ */
+  var MONTHS = { janvier: 1, fevrier: 2, mars: 3, avril: 4, mai: 5, juin: 6, juillet: 7, aout: 8, septembre: 9, octobre: 10, novembre: 11, decembre: 12 };
+  var STRIP = { le: 1, la: 1, les: 1, de: 1, du: 1, des: 1, a: 1, pour: 1, en: 1, sur: 1, et: 1, coup: 1, coups: 1, g: 1, gramme: 1, grammes: 1, environ: 1, euh: 1, heu: 1, hum: 1, oui: 1 };
+
+  /* Ordre de dictée : échantillon → opérateur → date → essais de liquidité colonne par colonne → plasticité */
+  var SEQ_MASTER = [
+    "m-ech", "m-op", "m-date",
+    "l-N-0", "l-tare-0", "l-a-0", "l-b-0", "l-c-0",
+    "l-N-1", "l-tare-1", "l-a-1", "l-b-1", "l-c-1",
+    "l-N-2", "l-tare-2", "l-a-2", "l-b-2", "l-c-2",
+    "l-N-3", "l-tare-3", "l-a-3", "l-b-3", "l-c-3",
+    "l-N-4", "l-tare-4", "l-a-4", "l-b-4", "l-c-4",
+    "p-tare-0", "p-a-0", "p-b-0", "p-c-0",
+    "p-tare-1", "p-a-1", "p-b-1", "p-c-1"
+  ];
+
+  var recActive = null, recBtn = null, queuedBtn = null, hintShown = false;
+
+  function stopRec() {
+    if (recActive) { try { recActive.stop(); } catch (e) { } recActive = null; }
+    if (recBtn) {
+      recBtn.classList.remove("on");
+      var inp = el(recBtn.getAttribute("data-field"));
+      if (inp) inp.classList.remove("listening");
+      recBtn.title = "Dicter cette case";
+      recBtn = null;
+    }
+  }
+
+  function wordsToNumber(str) {
+    var norm = String(str).toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/\bpoint\b/g, " virgule ")
+      .replace(/\bet\b/g, " ")
+      .replace(/[-,]/g, " ")
+      .replace(/\bquatre\s+vingt(s)?\s+(onze|douze|treize|quatorze|quinze|seize|dix)\b/g, " quatrevingt$2 ")
+      .replace(/\bquatre\s+vingt(s)?\b/g, " quatrevingt ")
+      .replace(/\bsoixante\s+et\s+onze\b/g, " soixanteonze ")
+      .replace(/\bsoixante\s+dix\b/g, " soixantedix ")
+      .replace(/\s+/g, " ").trim();
+    var parts = norm.split(" ");
+    var decIdx = parts.indexOf("virgule");
+    var intPart = decIdx === -1 ? parts : parts.slice(0, decIdx);
+    var fracPart = decIdx === -1 ? [] : parts.slice(decIdx + 1);
+    var MAP = {
+      zero: 0, un: 1, une: 1, deux: 2, trois: 3, quatre: 4, cinq: 5, six: 6, sept: 7, huit: 8, neuf: 9,
+      dix: 10, onze: 11, douze: 12, treize: 13, quatorze: 14, quinze: 15, seize: 16,
+      vingt: 20, trente: 30, quarante: 40, cinquante: 50, soixante: 60,
+      soixantedix: 70, soixanteonze: 71, septante: 70,
+      quatrevingt: 80, octante: 80,
+      quatrevingtdix: 90, quatrevingtonze: 91, quatrevingtdouze: 92, quatrevingttreize: 93,
+      quatrevingtquatorze: 94, quatrevingtquinze: 95, quatrevingtseize: 96, nonante: 90,
+      cent: 100, cents: 100, mille: 1000, mil: 1000
+    };
+    var total = 0, current = 0, i, v;
+    for (i = 0; i < intPart.length; i++) {
+      v = MAP[intPart[i]];
+      if (v === undefined) return null;
+      if (v === 100) { current = (current === 0 ? 1 : current) * 100; }
+      else if (v === 1000) { current = (current === 0 ? 1 : current) * 1000; total += current; current = 0; }
+      else current += v;
+    }
+    var intVal = total + current;
+    var frac = "";
+    for (i = 0; i < fracPart.length; i++) {
+      v = MAP[fracPart[i]];
+      if (v !== undefined && v >= 0 && v <= 9) frac += v;
+    }
+    return frac ? parseFloat(intVal + "." + frac) : intVal;
+  }
+
+  function parseDigits(s) {
+    var m = String(s).replace(/,/g, ".").match(/\d+(?:\.\d+)?/);
+    return m ? parseFloat(m[0]) : null;
+  }
+
+  function parseSpoken(t) {
+    var s = String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/\bpour\s+cent\b|\bpourcent\b/g, " ")
+      .replace(/[-,]/g, " ");
+    var toks = s.split(/[^a-z0-9.,]+/i).filter(function (w) { return w && !STRIP[w]; });
+    s = toks.join(" ");
+    var m = s.replace(/,/g, ".").match(/\d+(?:\.\d+)?/);
+    if (m) return parseFloat(m[0]);
+    return wordsToNumber(s);
+  }
+
+  function parseSpokenDate(t) {
+    var s = String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[-,]/g, " ")
+      .replace(/\ble\b|\bdu\b|\bde\b|\bet\b/g, " ")
+      .replace(/\s+/g, " ").trim();
+    var day = null, month = null, year = null, monthIdx = -1, mName = null;
+    s.split(" ").forEach(function (w, idx) { if (MONTHS[w] !== undefined) { monthIdx = idx; mName = w; } });
+    if (monthIdx !== -1) {
+      var before = s.split(" ").slice(0, monthIdx).join(" ");
+      var after = s.split(" ").slice(monthIdx + 1).join(" ");
+      day = wordsToNumber(before); if (day === null) day = parseDigits(before);
+      year = wordsToNumber(after); if (year === null) year = parseDigits(after);
+      month = MONTHS[mName];
+    } else {
+      var nums = [];
+      s.split(" ").forEach(function (tok) {
+        var v = wordsToNumber(tok);
+        if (v === null) v = parseDigits(tok);
+        if (v !== null) nums.push(v);
+      });
+      if (nums.length >= 3) { day = nums[0]; month = nums[1]; year = nums[2]; }
+    }
+    if (!day || !month || !year) return null;
+    if (year < 100) year += 2000;
+    if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1900 || year > 2100) return null;
+    var pad = function (n) { return (n < 10 ? "0" : "") + n; };
+    return year + "-" + pad(month) + "-" + pad(day);
+  }
+
+  function canSpeech() {
+    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  }
+
+  function speechHint() {
+    if (!window.isSecureContext) {
+      if (hintShown) return false;
+      hintShown = true;
+      alert("La saisie vocale nécessite une connexion sécurisée (HTTPS).\n\n" +
+        "Le double-clic sur le fichier (file://) ne permet PAS la reconnaissance vocale.\n" +
+        "Testez sur votre site en ligne (https://atterberg.pages.dev)\n" +
+        "ou en local via http://localhost:8000");
+      return false;
+    }
+    if (!canSpeech()) {
+      alert("La reconnaissance vocale n'est pas disponible dans ce navigateur.\nUtilisez Google Chrome ou Microsoft Edge (dernière version).");
+      return false;
+    }
+    return true;
+  }
+
+  function flashBad(inp) {
+    inp.classList.add("bad-voice");
+    setTimeout(function () { inp.classList.remove("bad-voice"); }, 1500);
+  }
+
+  function autoAdvance(btn) {
+    var id = btn.getAttribute("data-field");
+    var idx = SEQ_MASTER.indexOf(id);
+    if (idx !== -1 && idx < SEQ_MASTER.length - 1) {
+      (function (nextId) {
+        setTimeout(function () {
+          var nb = document.querySelector('.mic[data-field="' + nextId + '"]');
+          if (nb && !recActive) beginRec(nb);
+        }, 650);
+      })(SEQ_MASTER[idx + 1]);
+    }
+  }
+
+  function commitValue(btn, txt) {
+    var target = el(btn.getAttribute("data-field"));
+    if (!target) return;
+    var kind = btn.getAttribute("data-kind") || "num";
+    if (kind === "text") {
+      target.value = txt;
+    } else if (kind === "date") {
+      var d = parseSpokenDate(txt);
+      if (d) target.value = d;
+      else { target.value = txt; flashBad(target); return; }
+    } else {
+      var n = parseSpoken(txt);
+      if (n !== null) target.value = n;
+      else { target.value = txt; flashBad(target); return; }
+    }
+    target.dispatchEvent(new Event("input", { bubbles: true }));
+    autoAdvance(btn);
+  }
+
+  function startRec(btn) {
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var r = new SR();
+    var target = el(btn.getAttribute("data-field"));
+    recActive = r; recBtn = btn;
+    var committed = false;
+    btn.classList.add("on");
+    btn.title = "Écoute… cliquer pour arrêter";
+    if (target) target.classList.add("listening");
+
+    r.lang = "fr-FR";
+    r.interimResults = true;
+    r.maxAlternatives = 10;
+    r.continuous = false;
+
+    r.onresult = function (e) {
+      var interim = "", finalTxt = "", i, res;
+      for (i = e.resultIndex; i < e.results.length; i++) {
+        res = e.results[i];
+        if (res.isFinal) finalTxt += res[0].transcript;
+        else interim += res[0].transcript;
+      }
+      if (finalTxt) {
+        committed = true;
+        if (target) target.classList.remove("listening");
+        commitValue(btn, finalTxt.trim());
+        try { r.stop(); } catch (err) { }
+      } else if (interim && target) {
+        target.value = interim;
+      }
+    };
+
+    r.onerror = function (ev) {
+      if (ev.error === "aborted") return;
+      var msg = "Reconnaissance vocale : ";
+      switch (ev.error) {
+        case "not-allowed": case "service-not-allowed":
+          msg += "microphone refusé. Cliquez sur l'icône 🎤 dans la barre d'adresse puis « Autoriser »."; break;
+        case "no-speech": msg += "aucune parole détectée. Parlez plus près du micro."; break;
+        case "audio-capture": msg += "microphone indisponible ou utilisé par une autre application."; break;
+        case "network": msg += "connexion Internet requise (la reconnaissance passe par un serveur)."; break;
+        default: msg += ev.error;
+      }
+      alert(msg);
+    };
+
+    r.onend = function () {
+      recActive = null;
+      if (recBtn === btn) {
+        btn.classList.remove("on");
+        if (target) target.classList.remove("listening");
+        btn.title = "Dicter cette case";
+        recBtn = null;
+        if (!committed && target && target.value !== "") {
+          commitValue(btn, String(target.value));
+        }
+      }
+      if (queuedBtn) {
+        var q = queuedBtn; queuedBtn = null;
+        setTimeout(function () { beginRec(q); }, 120);
+      }
+    };
+
+    try { r.start(); }
+    catch (err) {
+      recActive = null;
+      btn.classList.remove("on");
+      if (target) target.classList.remove("listening");
+    }
+  }
+
+  function beginRec(btn) {
+    if (btn.classList.contains("on")) { stopRec(); return; }
+    if (recActive) { queuedBtn = btn; stopRec(); return; }
+    if (!speechHint()) return;
+    startRec(btn);
+  }
+
+  /* Clic sur n'importe quel micro */
+  document.addEventListener("click", function (e) {
+    var b = e.target;
+    while (b && !(b.classList && b.classList.contains("mic"))) b = b.parentNode;
+    if (!b) return;
+    e.preventDefault();
+    beginRec(b);
+  });
+
+  /* Saisie manuelle pendant une dictée → on coupe le micro */
+  document.addEventListener("focusin", function (e) {
+    if (recActive && e.target && e.target.tagName === "INPUT" &&
+        recBtn && e.target.id !== recBtn.getAttribute("data-field")) {
+      stopRec();
+    }
+  });
+
+  window.addEventListener("pagehide", function () { stopRec(); });
+
+  buildTables();
+  syncFromState();
+  bind();
+  recalc();
+})();
+</script>
+<script>
+/* PWA : manifest + service worker (uniquement en http/https, jamais en file://) */
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.protocol === "http:")) {
+  var l = document.createElement("link");
+  l.rel = "manifest"; l.href = "manifest.json";
+  document.head.appendChild(l);
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js").catch(function (err) { console.warn(err); });
+  });
+}
+</script>
+</body>
+</html>
